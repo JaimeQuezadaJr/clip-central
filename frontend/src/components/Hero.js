@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 const HeroContainer = styled.div`
-  height: 80vh;
+  height: 100vh; /* Full viewport height */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -12,6 +12,16 @@ const HeroContainer = styled.div`
   color: white;
   text-align: center;
   padding: 0 20px;
+  position: relative; /* For positioning the scroll indicator */
+`;
+
+const LogoText = styled(motion.div)`
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  font-weight: 500;
+  opacity: 0.8;
 `;
 
 const Title = styled(motion.h1)`
@@ -37,16 +47,55 @@ const Subtitle = styled(motion.p)`
   }
 `;
 
-const LogoText = styled(motion.div)`
-  font-size: 1.2rem;
-  letter-spacing: 2px;
+// New scroll indicator component
+const ScrollIndicator = styled(motion.div)`
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+`;
+
+const ScrollText = styled.div`
+  font-size: 0.9rem;
+  margin-bottom: 8px;
   text-transform: uppercase;
-  margin-bottom: 2rem;
-  font-weight: 500;
-  opacity: 0.8;
+  letter-spacing: 1px;
+  opacity: 0.7;
+`;
+
+const ScrollIcon = styled(motion.div)`
+  width: 30px;
+  height: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
 `;
 
 const Hero = () => {
+  // Function to scroll to the clips section
+  const scrollToClips = () => {
+    const clipsSection = document.getElementById('clips-section');
+    if (clipsSection) {
+      clipsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <HeroContainer>
       <LogoText
@@ -70,6 +119,47 @@ const Hero = () => {
       >
         Check out my collection of the most incredible plays, victories, and highlights
       </Subtitle>
+      
+      <ScrollIndicator
+        onClick={scrollToClips}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
+      >
+        <ScrollText>Scroll to see clips</ScrollText>
+        <ScrollIcon
+          animate={{ 
+            y: [0, 10, 0],
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 1.5,
+            ease: "easeInOut" 
+          }}
+        >
+          <motion.div
+            animate={{ 
+              y: [0, 15, 0],
+              opacity: [1, 0, 1]
+            }}
+            transition={{ 
+              repeat: Infinity, 
+              duration: 1.5,
+              ease: "easeInOut" 
+            }}
+            style={{
+              width: '6px',
+              height: '6px',
+              background: 'white',
+              borderRadius: '50%',
+              position: 'absolute',
+              top: '8px',
+              left: '50%',
+              transform: 'translateX(-50%)'
+            }}
+          />
+        </ScrollIcon>
+      </ScrollIndicator>
     </HeroContainer>
   );
 };

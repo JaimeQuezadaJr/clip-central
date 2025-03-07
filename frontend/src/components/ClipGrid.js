@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 
 const GridContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 40px 20px 80px;
 `;
 
 const Grid = styled.div`
@@ -113,13 +113,6 @@ const ClipDate = styled.p`
   font-size: 0.9rem;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 30px;
-  text-align: center;
-`;
-
 // Play icon SVG
 const PlayIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
@@ -127,32 +120,51 @@ const PlayIcon = () => (
   </svg>
 );
 
-// Thumbnail component that handles loading and errors
+// Add a new component for video thumbnails
+const VideoThumbnail = styled.video`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0; // Initially hidden
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
+const ThumbnailCanvas = styled.canvas`
+  display: none; // Hidden canvas for capturing frames
+`;
+
+// Simplified ClipThumbnail component
 const ClipThumbnail = ({ clip }) => {
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
-  // Function to get a direct thumbnail URL
+  // Function to get a thumbnail URL through your proxy
   const getThumbnailUrl = (clip) => {
-    // Try to use the thumbnail URL from the API response
-    if (clip.thumbnail) {
-      return clip.thumbnail;
-    }
-    
-    // Fallback to a direct Google Drive thumbnail URL
-    return `https://drive.google.com/thumbnail?id=${clip.id}&sz=w320-h180`;
+    return `http://localhost:8000/api/proxy-thumbnail/${clip.id}`;
   };
   
   return (
     <Thumbnail>
-      {!error ? (
-        <ThumbnailImage 
-          src={getThumbnailUrl(clip)}
-          alt={clip.name}
-          loaded={loaded}
-          onLoad={() => setLoaded(true)}
-          onError={() => setError(true)}
-        />
+      {!imageError ? (
+        <>
+          {!imageLoaded && (
+            <FallbackThumbnail>
+              <LoadingSpinner />
+            </FallbackThumbnail>
+          )}
+          <ThumbnailImage 
+            src={getThumbnailUrl(clip)}
+            alt={clip.name}
+            style={{ opacity: imageLoaded ? 1 : 0 }}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              console.error(`Failed to load thumbnail for ${clip.name}`);
+              setImageError(true);
+            }}
+          />
+        </>
       ) : (
         <FallbackThumbnail>
           <PlayIcon />
@@ -167,7 +179,70 @@ const ClipThumbnail = ({ clip }) => {
   );
 };
 
+// Add a loading spinner component
+const LoadingSpinner = styled.div`
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
 const ClipGrid = ({ clips, onClipSelect }) => {
+  const controls = useAnimation();
+  const gridRef = useRef(null);
+  
+  // Set up Intersection Observer to trigger animations when grid comes into view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When grid enters viewport
+        if (entry.isIntersecting) {
+          controls.start('visible');
+        }
+      },
+      { threshold: 0.1 } // Trigger when 10% of the element is visible
+    );
+    
+    if (gridRef.current) {
+      observer.observe(gridRef.current);
+    }
+    
+    return () => {
+      if (gridRef.current) {
+        observer.unobserve(gridRef.current);
+      }
+    };
+  }, [controls]);
+  
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1 // Stagger the animations of children
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -177,23 +252,25 @@ const ClipGrid = ({ clips, onClipSelect }) => {
     });
   };
 
-  // Function to get a clean display name
   const getDisplayName = (filename) => {
-    // Remove file extension
     return filename.replace(/\.[^/.]+$/, "");
   };
 
   return (
-    <GridContainer>
-      <SectionTitle>Latest Clips</SectionTitle>
-      <Grid>
-        {clips.map((clip, index) => (
+    <GridContainer id="clips-section" ref={gridRef}>
+      <Grid
+        as={motion.div}
+        variants={containerVariants}
+        initial="hidden"
+        animate={controls}
+      >
+        {clips.map((clip) => (
           <ClipCard
             key={clip.id}
             onClick={() => onClipSelect(clip)}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            variants={itemVariants}
+            // No need for initial, animate, or transition props here
+            // as they're inherited from the parent motion component
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
           >
