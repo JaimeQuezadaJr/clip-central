@@ -18,12 +18,17 @@ const Overlay = styled(motion.div)`
 
 const PlayerContainer = styled(motion.div)`
   width: 90%;
-  max-width: 1000px;
+  max-width: 1200px;
   background: black;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  
+  &::before {
+    content: "";
+    display: block;
+    padding-top: 56.25%;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -55,6 +60,7 @@ const VideoFrame = styled.iframe`
   width: 100%;
   height: 100%;
   border: none;
+  object-fit: contain;
 `;
 
 const VideoPlayer = ({ clip, onClose }) => {

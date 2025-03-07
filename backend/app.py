@@ -43,7 +43,7 @@ def get_clips():
             .list(
                 q=query,
                 pageSize=50,
-                fields="files(id, name, webViewLink, thumbnailLink, createdTime)",
+                fields="files(id, name, thumbnailLink, createdTime)",
             )
             .execute()
         )
@@ -58,12 +58,18 @@ def get_clips():
             )
             # Create a streaming link
             stream_link = f"https://drive.google.com/file/d/{item['id']}/preview"
+            # Get the thumbnail link or create a fallback
+            thumbnail = item.get("thumbnailLink")
+            if not thumbnail:
+                thumbnail = (
+                    f"https://drive.google.com/thumbnail?id={item['id']}&sz=w320-h180"
+                )
 
             clips.append(
                 {
                     "id": item["id"],
                     "name": item["name"],
-                    "thumbnail": item.get("thumbnailLink", ""),
+                    "thumbnail": thumbnail,
                     "created": item["createdTime"],
                     "download_link": download_link,
                     "stream_link": stream_link,
