@@ -41,10 +41,26 @@ html {
   scroll-behavior: smooth;
 }
 
+:root {
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+}
+
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* Ensure body extends to the edges */
+  padding-top: var(--sat, 0);
+  padding-right: var(--sar, 0);
+  padding-bottom: var(--sab, 0);
+  padding-left: var(--sal, 0);
+  margin-top: calc(-1 * var(--sat, 0));
+  margin-right: calc(-1 * var(--sar, 0));
+  margin-bottom: calc(-1 * var(--sab, 0));
+  margin-left: calc(-1 * var(--sal, 0));
   overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 

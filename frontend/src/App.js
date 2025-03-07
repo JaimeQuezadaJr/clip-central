@@ -7,11 +7,19 @@ import ClipGrid from './components/ClipGrid';
 import VideoPlayer from './components/VideoPlayer';
 import './App.css';
 
+// Get API URL from environment variables with fallback
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const AppContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: #333;
   background-color: #f5f5f7;
   min-height: 100vh;
+  /* Handle iOS safe areas */
+  padding-top: env(safe-area-inset-top, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
 `;
 
 // Updated ContentSection with better spacing
@@ -89,7 +97,8 @@ function App() {
         setLoading(true);
         setError(null);
         
-        const response = await axios.get('http://localhost:8000/api/clips');
+        // Use the environment variable for the API URL
+        const response = await axios.get(`${API_URL}/api/clips`);
         setClips(response.data);
         setLoading(false);
       } catch (error) {

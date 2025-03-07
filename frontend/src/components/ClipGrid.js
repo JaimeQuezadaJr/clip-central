@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, useAnimation } from 'framer-motion';
 
+// Get API URL from environment variables with fallback
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const GridContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -142,7 +145,7 @@ const ClipThumbnail = ({ clip }) => {
   
   // Function to get a thumbnail URL through your proxy
   const getThumbnailUrl = (clip) => {
-    return `http://localhost:8000/api/proxy-thumbnail/${clip.id}`;
+    return `${API_URL}/api/proxy-thumbnail/${clip.id}`;
   };
   
   return (

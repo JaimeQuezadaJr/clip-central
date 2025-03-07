@@ -13,6 +13,10 @@ const HeroContainer = styled.div`
   text-align: center;
   padding: 0 20px;
   position: relative; /* For positioning the scroll indicator */
+  
+  /* Fix for iOS devices to extend background to the top */
+  padding-top: env(safe-area-inset-top, 0);
+  margin-top: -env(safe-area-inset-top, 0);
 `;
 
 const LogoText = styled(motion.div)`
