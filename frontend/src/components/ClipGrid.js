@@ -125,21 +125,6 @@ const PlayIcon = () => (
   </svg>
 );
 
-// Add a new component for video thumbnails
-const VideoThumbnail = styled.video`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0; // Initially hidden
-  position: absolute;
-  top: 0;
-  left: 0;
-`;
-
-const ThumbnailCanvas = styled.canvas`
-  display: none; // Hidden canvas for capturing frames
-`;
-
 // Simplified ClipThumbnail component
 const ClipThumbnail = ({ clip }) => {
   const [imageError, setImageError] = useState(false);

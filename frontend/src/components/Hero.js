@@ -62,16 +62,6 @@ const Subtitle = styled(motion.p)`
   }
 `;
 
-const LogoText = styled(motion.div)`
-  font-size: 1.2rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  font-weight: 500;
-  opacity: 0.8;
-  color: #333;
-`;
-
 // Scroll indicator with updated colors
 const ScrollIndicator = styled(motion.div)`
   position: absolute;
