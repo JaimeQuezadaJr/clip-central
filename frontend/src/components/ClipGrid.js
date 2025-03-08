@@ -199,13 +199,17 @@ const ClipGrid = ({ clips, onClipSelect }) => {
       { threshold: 0.1 } // Trigger when 10% of the element is visible
     );
     
-    if (gridRef.current) {
-      observer.observe(gridRef.current);
+    // Store a reference to the current value
+    const currentRef = gridRef.current;
+    
+    if (currentRef) {
+      observer.observe(currentRef);
     }
     
     return () => {
-      if (gridRef.current) {
-        observer.unobserve(gridRef.current);
+      // Use the stored reference in the cleanup function
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [controls]);
