@@ -72,6 +72,7 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedClip, setSelectedClip] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [appError, setAppError] = useState(null);
   
   // Auto-scroll to top on page load/reload
   useEffect(() => {
@@ -178,6 +179,59 @@ function App() {
       behavior: 'smooth'
     });
   };
+  
+  // Add global error handler
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('Global error:', event.error);
+      setAppError(event.error?.message || 'An unknown error occurred');
+      // Prevent the default error handling
+      event.preventDefault();
+    };
+    
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+  
+  // Add this near the top of your App component
+  useEffect(() => {
+    const testApi = async () => {
+      try {
+        console.log('Testing API connection...');
+        const response = await fetch('/api/clips');
+        
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API test successful:', data);
+      } catch (error) {
+        console.error('API test failed:', error);
+      }
+    };
+    
+    testApi();
+  }, []);
+  
+  // Add error boundary to your return
+  if (appError) {
+    return (
+      <div style={{ padding: '20px', maxWidth: '600px', margin: '40px auto', textAlign: 'center' }}>
+        <h1>Something went wrong</h1>
+        <p>{appError}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{ padding: '10px 20px', marginTop: '20px', cursor: 'pointer' }}
+        >
+          Reload Page
+        </button>
+      </div>
+    );
+  }
   
   return (
     <AppContainer>
