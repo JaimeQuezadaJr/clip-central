@@ -1,6 +1,6 @@
 # Fortnite Clips Website
 
-A web application to showcase Fortnite gameplay clips using React, Flask, and Google Drive API.
+A web app to showcase Fortnite gameplay clips using React, Flask, and Google Drive API.
 
 ## Project Structure
 
