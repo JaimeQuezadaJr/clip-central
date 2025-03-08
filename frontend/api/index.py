@@ -5,6 +5,7 @@ import json
 from googleapiclient.discovery import build
 import requests
 from io import BytesIO
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -98,6 +99,17 @@ def proxy_thumbnail(file_id):
     except Exception as e:
         print(f"Error fetching thumbnail: {str(e)}")
         return "Error fetching thumbnail", 500
+
+
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    return jsonify(
+        {
+            "status": "ok",
+            "message": "API is working",
+            "timestamp": str(datetime.datetime.now()),
+        }
+    )
 
 
 # This is used by Vercel serverless function

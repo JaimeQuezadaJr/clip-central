@@ -5,6 +5,7 @@
     { "src": "api/index.py", "use": "@vercel/python" }
   ],
   "routes": [
+    { "src": "/fallback", "dest": "/fallback.html" },
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "^/static/(.*)", "dest": "/static/$1" },
     { "src": ".*", "dest": "/index.html" }
