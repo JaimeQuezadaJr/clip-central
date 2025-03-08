@@ -3,7 +3,9 @@ import styled from 'styled-components';
 import { motion, useAnimation } from 'framer-motion';
 
 // Get API URL from environment variables with fallback
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '' 
+  : (process.env.REACT_APP_API_URL || 'http://localhost:8000');
 
 const GridContainer = styled.div`
   max-width: 1200px;

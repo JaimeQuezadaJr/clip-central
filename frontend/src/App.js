@@ -7,8 +7,13 @@ import ClipGrid from './components/ClipGrid';
 import VideoPlayer from './components/VideoPlayer';
 import './App.css';
 
-// Get API URL from environment variables with fallback
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Replace this:
+// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// With this:
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? '' // Empty string for production (uses relative URLs)
+  : (process.env.REACT_APP_API_URL || 'http://localhost:8000'); // For development
 
 const AppContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -22,12 +27,13 @@ const AppContainer = styled.div`
   padding-left: env(safe-area-inset-left, 0);
 `;
 
-// Updated ContentSection with better spacing
+// Updated ContentSection with subtle background
 const ContentSection = styled(motion.div)`
-  padding-top: 60px; // Increased padding for better spacing
+  padding-top: 60px;
   padding-bottom: 80px;
-  min-height: 100vh; // Ensure it takes up at least a full viewport height
-  background-image: radial-gradient(circle at 25px 25px, #eaeaea 2%, transparent 0%);
+  min-height: 100vh;
+  background-color: #f8f8f8; /* Light gray background for content section */
+  background-image: radial-gradient(circle at 25px 25px, #f0f0f0 2%, transparent 0%);
   background-size: 50px 50px;
   background-position: 0 0;
 `;
@@ -86,21 +92,36 @@ function App() {
     
     window.addEventListener('scroll', handleScroll);
     
+    // Set background color
+    document.documentElement.style.backgroundColor = 'white';
+    document.body.style.backgroundColor = 'white';
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
     };
   }, []);
   
+  // Fetch clips from API
   useEffect(() => {
     const fetchClips = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Use the environment variable for the API URL
         const response = await axios.get(`${API_URL}/api/clips`);
         setClips(response.data);
         setLoading(false);
+        
+        // Check if there's a clip ID in the URL hash
+        const clipId = window.location.hash.replace('#clip-', '');
+        if (clipId) {
+          const clip = response.data.find(c => c.id === clipId);
+          if (clip) {
+            setSelectedClip(clip);
+          }
+        }
       } catch (error) {
         console.error('Error fetching clips:', error);
         setError(error.message || 'Failed to fetch clips');
@@ -115,13 +136,39 @@ function App() {
     return () => clearInterval(interval);
   }, []);
   
+  // Handle clip selection and update URL
   const handleClipSelect = (clip) => {
     setSelectedClip(clip);
+    // Update URL with clip ID
+    window.location.hash = `clip-${clip.id}`;
   };
   
+  // Handle closing the player and updating URL
   const closePlayer = () => {
     setSelectedClip(null);
+    // Remove clip ID from URL
+    window.history.pushState("", document.title, window.location.pathname + window.location.search);
   };
+  
+  // Listen for hash changes (e.g., when user uses browser back button)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const clipId = window.location.hash.replace('#clip-', '');
+      if (clipId) {
+        const clip = clips.find(c => c.id === clipId);
+        if (clip) {
+          setSelectedClip(clip);
+        }
+      } else {
+        setSelectedClip(null);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [clips]);
   
   // Function to scroll to top
   const scrollToTop = () => {
