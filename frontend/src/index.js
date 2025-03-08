@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+// Remove or comment out the App import if you're not using it
+// import App from './App';
 import TestApp from './TestApp';
 
 // Prevent scroll restoration
