@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Test Page</title>
+</head>
+<body>
+  <h1>Basic HTML Test</h1>
+  <p>If you can see this, basic HTML serving is working.</p>
+  
+  <div id="info"></div>
+  
+  <script>
+    // Display some basic information
+    const infoDiv = document.getElementById('info');
+    infoDiv.innerHTML = `
+      <p>Page loaded at: ${new Date().toLocaleString()}</p>
+      <p>URL: ${window.location.href}</p>
+      <p>User Agent: ${navigator.userAgent}</p>
+    `;
+    
+    // Log to console
+    console.log('Basic test page loaded successfully');
+    
+    // Test if fetch is working
+    fetch('/api/health')
+      .then(response => {
+        if (!response.ok) throw new Error('API health check failed');
+        return response.json();
+      })
+      .then(data => {
+        console.log('API health check:', data);
+        infoDiv.innerHTML += `<p>API health check: Success</p>`;
+      })
+      .catch(error => {
+        console.error('API error:', error);
+        infoDiv.innerHTML += `<p>API health check: Failed - ${error.message}</p>`;
+      });
+  </script>
+</body>
+</html> 

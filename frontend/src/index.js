@@ -4,6 +4,7 @@ import './index.css';
 // Remove or comment out the App import if you're not using it
 // import App from './App';
 import TestApp from './TestApp';
+import MinimalApp from './MinimalApp';
 
 // Prevent scroll restoration
 if ('scrollRestoration' in window.history) {
@@ -45,3 +46,26 @@ const renderApp = () => {
 
 // Execute the render function
 renderApp();
+
+// Log when index.js loads
+console.log('index.js loaded');
+
+try {
+  console.log('Attempting to render MinimalApp');
+  
+  // Use the most basic rendering approach
+  ReactDOM.render(
+    <MinimalApp />,
+    document.getElementById('root')
+  );
+  
+  console.log('MinimalApp rendered successfully');
+} catch (error) {
+  console.error('Error rendering MinimalApp:', error);
+  
+  // Try to display an error message
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    rootElement.innerHTML = `<h1>Error: ${error.message}</h1>`;
+  }
+}
