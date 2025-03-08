@@ -8,9 +8,5 @@
     { "src": "/api/(.*)", "dest": "/api/index.py" },
     { "src": "^/static/(.*)", "dest": "/static/$1" },
     { "src": ".*", "dest": "/index.html" }
-  ],
-  "env": {
-    "GOOGLE_DRIVE_API_KEY": "@google_drive_api_key",
-    "GOOGLE_DRIVE_FOLDER_ID": "@google_drive_folder_id"
-  }
+  ]
 } 
