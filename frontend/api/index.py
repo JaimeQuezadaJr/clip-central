@@ -107,14 +107,24 @@ def health_check():
         {
             "status": "ok",
             "message": "API is working",
-            "timestamp": str(datetime.datetime.now()),
+            "env_vars": {
+                "has_api_key": bool(os.environ.get("GOOGLE_DRIVE_API_KEY")),
+                "has_folder_id": bool(os.environ.get("GOOGLE_DRIVE_FOLDER_ID")),
+            },
         }
     )
 
 
-# This is used by Vercel serverless function
+# This is the handler for Vercel serverless functions
 def handler(request):
-    return app(request)
+    with app.test_client() as client:
+        return client.open(
+            path=request.path,
+            method=request.method,
+            headers={key: value for key, value in request.headers.items()},
+            data=request.data,
+            environ_base={"REMOTE_ADDR": request.headers.get("x-forwarded-for", "")},
+        )
 
 
 # For local development
