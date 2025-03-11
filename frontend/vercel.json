@@ -9,11 +9,19 @@
       }
     },
     {
-      "src": "api/index.py",
+      "src": "api/*.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
+    {
+      "src": "/api/clips",
+      "dest": "/api/clips.py"
+    },
+    {
+      "src": "/api/proxy-thumbnail/(.*)",
+      "dest": "/api/proxy-thumbnail.py?id=$1"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1",
@@ -32,13 +40,6 @@
     {
       "src": "/asset-manifest.json",
       "dest": "/asset-manifest.json"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
