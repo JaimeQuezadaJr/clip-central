@@ -1,8 +1,10 @@
 flask==2.0.1
 werkzeug==2.0.1
 flask-cors==3.0.10
-google-api-python-client==2.23.0
-google-auth-httplib2==0.1.0
-google-auth-oauthlib==0.4.6
-requests==2.26.0
 setuptools==57.0.0
+requests==2.26.0
+
+# Use older versions of Google libraries that are compatible with Python 3.9+
+google-api-python-client==1.12.8
+google-auth==1.35.0
+google-auth-httplib2==0.1.0
