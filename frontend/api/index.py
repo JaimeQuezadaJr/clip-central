@@ -1,46 +1,40 @@
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request as flask_request
 from flask_cors import CORS
 import os
 import json
-from googleapiclient.discovery import build
 import requests
-from io import BytesIO
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
 
-# Google Drive API setup
-def get_drive_service():
-    api_key = os.environ.get("GOOGLE_DRIVE_API_KEY")
-    return build("drive", "v3", developerKey=api_key)
-
-
 @app.route("/api/clips", methods=["GET"])
 def get_clips():
     try:
-        # Initialize the Drive API
-        service = get_drive_service()
-
-        # ID of the folder containing your Fortnite clips
+        # Get API key and folder ID from environment variables
+        api_key = os.environ.get("GOOGLE_DRIVE_API_KEY")
         folder_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID")
 
-        # Query files in the specified folder
-        query = (
-            f"'{folder_id}' in parents and trashed=false and mimeType contains 'video/'"
-        )
-        results = (
-            service.files()
-            .list(
-                q=query,
-                pageSize=50,
-                fields="files(id, name, thumbnailLink, createdTime)",
-            )
-            .execute()
-        )
+        if not api_key or not folder_id:
+            return jsonify({"error": "Missing API key or folder ID"}), 500
 
-        items = results.get("files", [])
+        # Use direct HTTP request instead of Google API client
+        url = f"https://www.googleapis.com/drive/v3/files"
+        params = {
+            "q": f"'{folder_id}' in parents and trashed=false and mimeType contains 'video/'",
+            "fields": "files(id,name,thumbnailLink,createdTime)",
+            "key": api_key,
+            "pageSize": 50,
+        }
+
+        response = requests.get(url, params=params)
+
+        if response.status_code != 200:
+            return jsonify({"error": f"Google Drive API error: {response.text}"}), 500
+
+        data = response.json()
+        items = data.get("files", [])
 
         clips = []
         for item in items:
@@ -107,6 +101,7 @@ def health_check():
         {
             "status": "ok",
             "message": "API is working",
+            "timestamp": str(datetime.now()),
             "env_vars": {
                 "has_api_key": bool(os.environ.get("GOOGLE_DRIVE_API_KEY")),
                 "has_folder_id": bool(os.environ.get("GOOGLE_DRIVE_FOLDER_ID")),
@@ -115,16 +110,22 @@ def health_check():
     )
 
 
-# This is the handler for Vercel serverless functions
+# Vercel serverless function handler
 def handler(request):
     with app.test_client() as client:
-        return client.open(
+        ctx = app.test_request_context(
             path=request.path,
             method=request.method,
             headers={key: value for key, value in request.headers.items()},
             data=request.data,
             environ_base={"REMOTE_ADDR": request.headers.get("x-forwarded-for", "")},
         )
+        with ctx:
+            try:
+                response = app.full_dispatch_request()
+                return response
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
 
 # For local development
